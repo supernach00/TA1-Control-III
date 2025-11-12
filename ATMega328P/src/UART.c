@@ -1,5 +1,5 @@
 #include <avr/io.h>
-
+#include <stdio.h>
 #include "uart.h"
 
 void USART_init(void) {
@@ -7,15 +7,15 @@ void USART_init(void) {
 	UBRR0H = (uint8_t)(BAUD_PRESCALLER >> 8);
 	UBRR0L = (uint8_t)(BAUD_PRESCALLER);
 
-	// Habilitar transmisión y recepción
+	// Habilitar transmisiï¿½n y recepciï¿½n
 	UCSR0B = (1 << RXEN0) | (1 << TXEN0);
 
-	// Configuración: 8 bits de datos, 1 bit de stop, sin paridad
+	// Configuraciï¿½n: 8 bits de datos, 1 bit de stop, sin paridad
 	UCSR0C = (1 << UCSZ01) | (1 << UCSZ00);
 }
 
 void USART_send(unsigned char data) {
-	// Esperar hasta que el buffer de transmisión esté vacío
+	// Esperar hasta que el buffer de transmisiï¿½n estï¿½ vacï¿½o
 	while (!(UCSR0A & (1 << UDRE0)));
 	UDR0 = data;
 }

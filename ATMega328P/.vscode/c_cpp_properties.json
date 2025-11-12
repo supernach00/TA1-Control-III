@@ -4,7 +4,7 @@
             "name": "avr",
             "includePath": [
                 "${workspaceFolder}/**",
-                "D:\\Microchip Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\avr"
+                "C:\\Ingeñieria\\TA1-Control-III\\ATMega328P\\include"
             ],
             "defines": [
                 "_DEBUG",
@@ -12,8 +12,19 @@
                 "_UNICODE",
                 "__AVR_ATmega1284P__"
             ],
-            "compilerPath": "D:\\Microchip Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gcc.exe",
+            "compilerPath": "C:\\Program Files (x86)\\Atmel\\Studio\\7.0\\toolchain\\avr8\\avr8-gnu-toolchain\\bin\\avr-gcc.exe",
             "cStandard": "c99"
+        },
+        {
+            "name": "aavr",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ]
         }
     ],
     "version": 4

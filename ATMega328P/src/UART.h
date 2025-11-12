@@ -6,11 +6,10 @@
 #define BAUD_PRESCALLER ((F_CPU / (16UL * BAUDRATE)) - 1)
 
 #include <avr/io.h>
-#include <stdio.h>
+#include <stdint.h>
 #include <util/delay.h>
 
-
-// Declaración de funciones
+// Declaraciï¿½n de funciones
 void USART_init(void);
 unsigned char USART_receive(void);
 void USART_send(unsigned char data);

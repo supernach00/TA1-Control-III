@@ -23,12 +23,17 @@ void setup_ADC(void){
 void setup_SWITCH(void){
 	
 	/*
-	PIN DE ENTRADA = PD2
+	PIN DE ENTRADA = PD4
 	CONFIGURACION = PULL-UP
 	*/
+
+	DDRD &= ~(1 << PD4);  
+    PORTD |= (1 << PD4); 
+
+    // Activar Pin Change Interrupt para Port D
+    PCICR |= (1 << PCIE2);     // PCIE2 controla Port D
+    PCMSK2 |= (1 << PCINT20);  // PD4 = PCINT20
 	
-	DDRD &= ~(1 << PD4); // PD4 como entrada
-	PORTD |= (1 << PD4); // Habilito resistencia de pull-up en PD4
 	}
 
 void setup_PWM(void){

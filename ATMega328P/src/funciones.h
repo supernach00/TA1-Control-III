@@ -25,6 +25,7 @@
 
 void setup_ADC(void);
 void setup_PWM(void);
+void setup_SWITCH(void);
 
 // Funciones generales
 

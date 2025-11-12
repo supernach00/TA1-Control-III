@@ -30,8 +30,8 @@ LDFLAGS = -mmcu=$(MCU)
 BUILD_DIR = build
 
 # Tools
-CC = "D:\Microchip Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe"
-OBJCOPY = "C:\Program Files\Microchip\xc8\v2.36\bin\avr-objcopy.exe" 
+CC = C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avr8-gnu-toolchain\bin\avr-gcc.exe 
+OBJCOPY = C:\Program Files\Microchip\xc8\v2.36\bin\avr-objcopy.exe
 
 # Output file names
 ELF = $(BUILD_DIR)/$(TARGET).elf

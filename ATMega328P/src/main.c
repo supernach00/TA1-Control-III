@@ -24,27 +24,40 @@ ISR(TIMER1_OVF_vect) {
 	
 	};
 
-int main(void)
-{
-    setup_ADC();
-	setup_PWM();
-	USART_init();
-	sei();
+ISR(PCINT2_vect) {
 
-	// ---- RESPUESTA AL ESCALON ---- //
+    if (PIND & (1 << PD4)) {
 
-	test_escalon(1000, 4000); // Test de respuesta al escalon: de 1V a 4V en 5 segundos, sale por PB1.
+		test_escalon(1000, 4000); // Test de respuesta al escalon: de 1V a 4V en 5 segundos, sale por PB1.
 
-    while (1) {
+    } else {
 
-		// if (flag_lectura_ADC) {
-		// 	flag_lectura_ADC = 0
-			
-		// 	USART_put_uint16(tension_entrada); // Verificaci�n de la correcta medici�n del ADC.
-			
-		// 	tension_entrada = leer_ADC();
-		// 	tension_filtrada = filtro_RC(referencia - tension_entrada);
-		// 	OCR1A = tension_a_WC(tension_filtrada);
+    }
+
+};
+
+	int main(void)
+	{
+		setup_ADC();
+		setup_PWM();
+		setup_SWITCH();
+		USART_init();
+		sei();
+
+		// ---- RESPUESTA AL ESCALON ---- //
+
+
+		while (1)
+		{
+
+			// if (flag_lectura_ADC) {
+			// 	flag_lectura_ADC = 0
+
+			// 	USART_put_uint16(tension_entrada); // Verificaci�n de la correcta medici�n del ADC.
+
+			// 	tension_entrada = leer_ADC();
+			// 	tension_filtrada = filtro_RC(referencia - tension_entrada);
+			// 	OCR1A = tension_a_WC(tension_filtrada);
 			
 		} 
 
