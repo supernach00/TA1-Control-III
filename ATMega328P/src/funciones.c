@@ -4,6 +4,9 @@
 
 extern volatile uint16_t tension_entrada;
 extern volatile uint16_t tension_filtrada;
+extern volatile uint16_t registro_LFSR;
+extern volatile uint8_t flag_test_PRBS;
+extern volatile uint16_t N;
 
 void setup_ADC(void){
 	
@@ -20,12 +23,14 @@ void setup_ADC(void){
 	
 	}
 	
-void setup_SWITCH(void){
+void setup_SWITCHS(void){
 	
 	/*
 	PIN DE ENTRADA = PD4
 	CONFIGURACION = PULL-UP
 	*/
+
+	// Configurar PD4 como entrada con pull-up
 
 	DDRD &= ~(1 << PD4);  
     PORTD |= (1 << PD4); 
@@ -34,6 +39,11 @@ void setup_SWITCH(void){
     PCICR |= (1 << PCIE2);     // PCIE2 controla Port D
     PCMSK2 |= (1 << PCINT20);  // PD4 = PCINT20
 	
+	// Configurar interrupción externa INT1 en PD3
+
+	EICRA |= (1 << ISC11);   // Configura interrupción INT1 en flanco descendente
+	EIMSK |= (1 << INT1);    // Habilita la interrupción INT1
+
 	}
 
 void setup_PWM(void){
@@ -117,3 +127,86 @@ void test_escalon(uint16_t bajo, uint16_t alto){
 	OCR1A = 0;
 	
 	}
+
+void setup_LFSR(void){
+
+	DDRB |= (1 << PB2); // PB2 como salida para la señal sincronizada
+
+	/*
+	TIMER = 0
+	MODO = CTC
+	PRESCALER = 1024 (f = 15625Hz)
+	COMPARADOR PERIODO = OCR0A = 255
+	*/
+
+	TCCR0A = (1 << WGM01);             // Modo CTC (WGM01=1, WGM00=0)
+    TCCR0B = (1 << CS02) | (1 << CS00); // Prescaler = 1024 (CS02=1, CS00=1)
+
+    OCR0A = 255;  // valor máximo posible, frecuencia mínima ≈ 61 Hz
+
+	}
+
+
+uint8_t LFSR_shift(void) {
+
+    uint8_t bit9 = (registro_LFSR >> 8) & 1;
+    uint8_t bit11 = (registro_LFSR >> 10) & 1;
+    uint8_t feedback_bit = bit9 ^ bit11;
+
+    uint8_t bit_salida = registro_LFSR & 1;
+
+	registro_LFSR = (registro_LFSR << 1) | (feedback_bit);
+
+	return bit_salida;
+}
+
+
+void actualizar_PWM_PRBS(void){
+
+	// Genera una señal PRBS con la PWM en el pin PB1.
+	// La secuencia PRBS se genera con un LFSR de 8 bits.
+	// El bit de salida del LFSR se utiliza para definir dos niveles de tensión:
+	// 1000mV (0) y 4000mV (1) con la PWM.
+	// En el pin PB2 genera una señal sincronizada a la PRBS, pero entre 0V y 5V, que se utiliza para medir la señal de entrada.
+
+	uint8_t bit_LFSR = LFSR_shift();
+
+	if (bit_LFSR == 1){
+		
+		OCR1A = tension_a_WC(4000);
+		PORTB |= (1 << PB2); // Señal de sincronización a 5V
+
+		} 
+
+	else {
+
+		OCR1A = tension_a_WC(1000);
+		PORTB &= ~(1 << PB2); // Señal de sincronización a 0V
+
+		}
+	}
+
+void comenzar_test_PRBS(void){
+
+	terminar_test_PRBS(); // Asegura que el test PRBS esté detenido antes de comenzar uno nuevo
+
+	N = 0; 
+
+	flag_test_PRBS = 1;
+
+	registro_LFSR = 0b01100110011; 
+
+    TIMSK0 = (1 << OCIE0A);  // Habilitar interrupción por comparación con OCR0A
+
+	}
+
+void terminar_test_PRBS(void){
+
+	TIMSK0 &= ~(1 << OCIE0A);  // Deshabilitar interrupción por comparación con OCR0A
+
+	flag_test_PRBS = 0;
+
+	OCR1A = 0; // Apagar salida PWM
+	PORTB &= ~(1 << PB2); // Señal de sincronización a 0V
+
+}
