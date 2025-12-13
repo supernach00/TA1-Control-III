@@ -35,7 +35,7 @@ ISR(PCINT2_vect) {
 
     if (PIND & (1 << PD4)) {
 
-		terminar_test_PRBS(); 
+		terminar_test_PRBS(); // Me aseguro de que el test PRBS esté detenido antes de comenzar el test del escalón.
 
 		test_escalon(1000, 4000); // Test de respuesta al escalon: de 1V a 4V en 5 segundos, sale por PB1.
 
@@ -59,9 +59,10 @@ ISR(TIMER0_COMPA_vect)
 
 	contador_PRBS++;
 
-	if (contador_PRBS >= 4) { // Se ejecuta aproximadamente cada 0.082 segundos
+	if (contador_PRBS >= 4) { 
 
-		N++;
+		N++; // N lleva cuenta de  la cantidad de bits generados en el test de PRBS. Termina cuando N = 2047.
+
 		if (N == 2047) {
 
 			terminar_test_PRBS();
@@ -83,9 +84,6 @@ ISR(TIMER0_COMPA_vect)
 		setup_LFSR();
 		USART_init();
 		sei();
-
-		// ---- RESPUESTA AL ESCALON ---- //
-
 
 		while (1)
 		{

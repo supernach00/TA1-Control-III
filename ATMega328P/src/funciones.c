@@ -1,14 +1,14 @@
 #include "funciones.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
-
 extern volatile uint16_t tension_entrada;
 extern volatile uint16_t tension_filtrada;
 extern volatile uint16_t registro_LFSR;
-extern volatile uint8_t flag_test_PRBS;
 extern volatile uint16_t N;
 
 void setup_ADC(void){
+	
+	// Esta funcion configura el ADC para realizar lecturas en el pin ADC1 con una referencia de 5V y un prescaler de 128.
 	
 	/*
 	PRESCALER = 128 (f_adc = 125Khz)
@@ -25,6 +25,8 @@ void setup_ADC(void){
 	
 void setup_SWITCHS(void){
 	
+	// Esta funcion configura el pin PD4 como entrada con resistencia pull-up y habilita la interrupción por cambio de pin.
+
 	/*
 	PIN DE ENTRADA = PD4
 	CONFIGURACION = PULL-UP
@@ -47,6 +49,8 @@ void setup_SWITCHS(void){
 	}
 
 void setup_PWM(void){
+	
+	// Esta funcion configura el Timer1 para generar una señal PWM en el pin PB1.
 	
 	/*
 	TIMER = 1
@@ -71,6 +75,8 @@ void setup_PWM(void){
 	
 uint16_t leer_ADC(){
 	
+	// Esta funcion realiza una lectura del ADC y devuelve el valor en milivoltios.
+
 	ADCSRA |= (1 << ADSC);
 	
 	while ( !(ADCSRA & (1 << ADIF)) ); // Se espera hasta que termine la conversion.
@@ -83,7 +89,7 @@ uint16_t leer_ADC(){
 		
 uint16_t filtro_RC(uint16_t error){
 	
-	// Filtrado
+	// Esta funcion realiza un filtrado RC digital
 	
 	float tension_salida = (alfa * tension_filtrada + beta * error);
 	
@@ -93,7 +99,7 @@ uint16_t filtro_RC(uint16_t error){
 
 uint16_t tension_a_WC(uint16_t tension){
 	
-	// Convierte un valor de tensi�n en milivoltios a un entero entre 0 y 15999, que se utiliza
+	// Esta funcion convierte un valor de tension en milivoltios a un entero entre 0 y 15999, que se utiliza
 	// como valor de comparacion del timer1.
 	// Esto define el ciclo de trabajo (WC) de la PWM de salida.
 	
@@ -104,7 +110,7 @@ uint16_t tension_a_WC(uint16_t tension){
 
 void test_escalon(uint16_t bajo, uint16_t alto){
 
-	// Genera un escalon con una pwm en el pin PB1, que va desde un valor "bajo (mV)" hasta un valor "alto (mV)".
+	// Esta funcion genera un escalon con una pwm en el pin PB1, que va desde un valor "bajo (mV)" hasta un valor "alto (mV)".
 	// Luego se repite el test pero con  un escalon en sentido contrario.
 	// En el pin PB2 genera una señal sincronizada al escalón, pero entre 0V y 1V, que se utiliza para medir la señal de entrada.
 
@@ -130,6 +136,9 @@ void test_escalon(uint16_t bajo, uint16_t alto){
 
 void setup_LFSR(void){
 
+	// Esta funcion configura el Timer0 para generar interrupciones a aproximadamente 61 Hz, que se utilizan para actualizar la señal PRBS.
+	// También configura el pin PB2 como salida para la señal de sincronización.
+
 	DDRB |= (1 << PB2); // PB2 como salida para la señal sincronizada
 
 	/*
@@ -139,15 +148,18 @@ void setup_LFSR(void){
 	COMPARADOR PERIODO = OCR0A = 255
 	*/
 
-	TCCR0A = (1 << WGM01);             // Modo CTC (WGM01=1, WGM00=0)
+	TCCR0A = (1 << WGM01);              // Modo CTC (WGM01=1, WGM00=0)
     TCCR0B = (1 << CS02) | (1 << CS00); // Prescaler = 1024 (CS02=1, CS00=1)
 
-    OCR0A = 255;  // valor máximo posible, frecuencia mínima ≈ 61 Hz
+    OCR0A = 255;  // valor máximo posible, frecuencia mínima de 61 Hz
 
 	}
 
 
 uint8_t LFSR_shift(void) {
+
+	// Esta funcion realiza un corrimiento del registro LFSR de 11 bits y devuelve el bit de salida (0 o 1).
+	// La ralimentación se realiza en el bit 1 con el xor de los bits 9 y 11.
 
     uint8_t bit9 = (registro_LFSR >> 8) & 1;
     uint8_t bit11 = (registro_LFSR >> 10) & 1;
@@ -163,8 +175,7 @@ uint8_t LFSR_shift(void) {
 
 void actualizar_PWM_PRBS(void){
 
-	// Genera una señal PRBS con la PWM en el pin PB1.
-	// La secuencia PRBS se genera con un LFSR de 8 bits.
+	// Esta funcion convierte el valor del bit generado por el LFSR en una señal PWM.
 	// El bit de salida del LFSR se utiliza para definir dos niveles de tensión:
 	// 1000mV (0) y 4000mV (1) con la PWM.
 	// En el pin PB2 genera una señal sincronizada a la PRBS, pero entre 0V y 5V, que se utiliza para medir la señal de entrada.
@@ -188,13 +199,13 @@ void actualizar_PWM_PRBS(void){
 
 void comenzar_test_PRBS(void){
 
+	// Esta funcion inicia el test PRBS: reinicia contadores, define el valor semilla del LFSR y habilita la interrupción del Timer0.
+
 	terminar_test_PRBS(); // Asegura que el test PRBS esté detenido antes de comenzar uno nuevo
 
-	N = 0; 
+	N = 0; // Contador de las iteraciones del PRBS, es decir, la cantidad de bits generados hasta el momento.
 
-	flag_test_PRBS = 1;
-
-	registro_LFSR = 0b01100110011; 
+	registro_LFSR = 0b01100110011; // Estado inicial del LFSR de 11 bits.
 
     TIMSK0 = (1 << OCIE0A);  // Habilitar interrupción por comparación con OCR0A
 
@@ -202,9 +213,9 @@ void comenzar_test_PRBS(void){
 
 void terminar_test_PRBS(void){
 
-	TIMSK0 &= ~(1 << OCIE0A);  // Deshabilitar interrupción por comparación con OCR0A
+	// Esta funcion detiene el test PRBS. Deshabilita la interrupción y apaga la salida PWM y la señal de sincronización.
 
-	flag_test_PRBS = 0;
+	TIMSK0 &= ~(1 << OCIE0A);  // Deshabilitar interrupción por comparación con OCR0A
 
 	OCR1A = 0; // Apagar salida PWM
 	PORTB &= ~(1 << PB2); // Señal de sincronización a 0V
