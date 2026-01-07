@@ -196,6 +196,11 @@ void comenzar_test_PRBS(void){
 
 	registro_LFSR = 0b01100110011; 
 
+	OCR1A = tension_a_WC(1000); // Inicia con 1V
+	PORTB &= ~(1 << PB2); // Señal de sincronización a 0V
+
+	_delay_ms(1000); // Espera 1 segundo antes de comenzar el test PRBS
+
     TIMSK0 = (1 << OCIE0A);  // Habilitar interrupción por comparación con OCR0A
 
 	}

@@ -27,7 +27,7 @@ ISR(TIMER1_OVF_vect) {
 	
 	flag_lectura_ADC = 1;
 	
-	};
+};
 
 ISR(PCINT2_vect) { 
 	
@@ -39,10 +39,7 @@ ISR(PCINT2_vect) {
 
 		test_escalon(1000, 4000); // Test de respuesta al escalon: de 1V a 4V en 5 segundos, sale por PB1.
 
-    } else {
-
     }
-
 };
 
 ISR(INT1_vect)
@@ -59,7 +56,7 @@ ISR(TIMER0_COMPA_vect)
 
 	contador_PRBS++;
 
-	if (contador_PRBS >= 4) { // Se ejecuta aproximadamente cada 0.082 segundos
+	if (contador_PRBS >= 4) { // Se ejecuta aproximadamente cada 0.066 segundos
 
 		N++;
 		if (N == 2047) {
@@ -90,15 +87,7 @@ ISR(TIMER0_COMPA_vect)
 		while (1)
 		{
 
-			// if (flag_lectura_ADC) {
-			// 	flag_lectura_ADC = 0
-
-			// 	USART_put_uint16(tension_entrada); // Verificaci�n de la correcta medici�n del ADC.
-
-			// 	tension_entrada = leer_ADC();
-			// 	tension_filtrada = filtro_RC(referencia - tension_entrada);
-			// 	OCR1A = tension_a_WC(tension_filtrada);
-			
+		
 		} 
 
     return 0;
