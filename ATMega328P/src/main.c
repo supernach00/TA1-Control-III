@@ -25,8 +25,8 @@ uint8_t flag_lectura_ADC = 0;
 
 ISR(TIMER1_OVF_vect) {
 	
-	flag_lectura_ADC = 1;
-	
+	 flag_lectura_ADC = 1; // Esta interrupcion no se usa en este TA.
+
 };
 
 ISR(PCINT2_vect) { 

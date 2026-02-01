@@ -106,7 +106,7 @@ void test_escalon(uint16_t bajo, uint16_t alto){
 
 	// Genera un escalon con una pwm en el pin PB1, que va desde un valor "bajo (mV)" hasta un valor "alto (mV)".
 	// Luego se repite el test pero con  un escalon en sentido contrario.
-	// En el pin PB2 genera una señal sincronizada al escalón, pero entre 0V y 1V, que se utiliza para medir la señal de entrada.
+	// En el pin PB2 genera una señal sincronizada al escalón, pero entre 0V y 5V, que se utiliza para observar la señal de entrada.
 
 	DDRB |= (1 << PB2); // PB2 como salida
 
@@ -115,7 +115,7 @@ void test_escalon(uint16_t bajo, uint16_t alto){
 	_delay_ms(3000);
 
 	OCR1A = tension_a_WC(alto);
-	PORTB |= (1 << PB2); // Señal de sincronización a 1V
+	PORTB |= (1 << PB2); // Señal de sincronización a 5V
 	_delay_ms(3000);
 
 	// Escalon de alto a bajo
@@ -146,18 +146,19 @@ void setup_LFSR(void){
 
 	}
 
-
-uint8_t LFSR_shift(void) {
-
-    uint8_t bit9 = (registro_LFSR >> 8) & 1;
+uint8_t LFSR_shift(void)
+{
+    uint8_t bit9  = (registro_LFSR >> 8) & 1;
     uint8_t bit11 = (registro_LFSR >> 10) & 1;
     uint8_t feedback_bit = bit9 ^ bit11;
 
-    uint8_t bit_salida = registro_LFSR & 1;
+    // Salida = MSB (bit más significativo)
+    uint8_t bit_salida = bit11;
 
-	registro_LFSR = (registro_LFSR << 1) | (feedback_bit);
+    // Shift a la izquierda + insertar feedback, manteniendo solo 11 bits
+    registro_LFSR = ((registro_LFSR << 1) | feedback_bit) & 0x7FF;
 
-	return bit_salida;
+    return bit_salida;
 }
 
 
@@ -188,13 +189,13 @@ void actualizar_PWM_PRBS(void){
 
 void comenzar_test_PRBS(void){
 
-	terminar_test_PRBS(); // Asegura que el test PRBS esté detenido antes de comenzar uno nuevo
+	terminar_test_PRBS(); // Aseguro que el test PRBS esté detenido antes de comenzar uno nuevo
 
 	N = 0; 
 
 	flag_test_PRBS = 1;
 
-	registro_LFSR = 0b01100110011; 
+	registro_LFSR = 0b11111111111;
 
 	OCR1A = tension_a_WC(1000); // Inicia con 1V
 	PORTB &= ~(1 << PB2); // Señal de sincronización a 0V
